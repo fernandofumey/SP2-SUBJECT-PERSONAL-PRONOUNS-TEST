@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es" translate="no" class="notranslate">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Spanish Subject Pronouns Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            /* Prevent AI sidebars and students from highlighting text */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom radio button styles for better visibility */
+        input[type="radio"] {
+            transform: scale(1.2);
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #bfdbfe;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-label:hover {
+            border-color: #60a5fa;
+            background-color: #eff6ff;
+        }
+        
+        input[type="radio"]:checked + .option-text {
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-blue-900 min-h-screen flex flex-col items-center justify-center p-4" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+    <!-- URL to your Google Apps Script Web App (Follow instructions below to get this) -->
+    <script>
+        const GOOGLE_SHEET_WEB_APP_URL = "YOUR_GOOGLE_WEB_APP_URL_HERE"; 
+    </script>
+
+    <div id="app-container" class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold tracking-wide">Spanish Subject Pronouns</h1>
+            <p class="text-blue-200 mt-2">Demonstrate your knowledge of Spanish pronouns and their rules</p>
+        </div>
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="p-8">
+            <form id="student-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">First Name</label>
+                        <input type="text" id="fname" required class="w-full border-2 border-blue-200 rounded-lg p-3 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">Last Name</label>
+                        <input type="text" id="lname" required class="w-full border-2 border-blue-200 rounded-lg p-3 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">School Email / ID</label>
+                    <input type="text" id="email" required class="w-full border-2 border-blue-200 rounded-lg p-3 focus:outline-none focus:border-blue-500">
+                    <p class="text-xs text-red-500 mt-1 hidden" id="email-error">This email has already taken the quiz.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Period</label>
+                    <select id="period" required class="w-full border-2 border-blue-200 rounded-lg p-3 focus:outline-none focus:border-blue-500 bg-white">
+                        <option value="" disabled selected>Select your period...</option>
+                        <option value="1st">1st</option>
+                        <option value="A2">A2</option>
+                        <option value="A4">A4</option>
+                        <option value="B2">B2</option>
+                        <option value="B3">B3</option>
+                        <option value="5th">5th</option>
+                    </select>
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 text-lg">
+                        Begin Quiz
+                    </button>
+                    <p class="text-xs text-center text-blue-500 mt-3 font-semibold">
+                        Warning: Do not click out of this window or switch tabs. Cheating attempts will be recorded!
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quiz-screen" class="p-8 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <span id="question-tracker" class="text-sm font-bold bg-blue-100 text-blue-800 py-1 px-3 rounded-full">Question 1 / 50</span>
+                <span id="cheat-counter-display" class="text-sm font-bold text-red-500 hidden">Alerts: <span id="cheat-number">0</span></span>
+            </div>
+            
+            <h2 id="question-text" class="text-2xl font-bold mb-6 text-center text-blue-950 select-none"></h2>
+            
+            <div id="options-container" class="space-y-3 mb-8">
+                <!-- Options injected via JS -->
+            </div>
+            
+            <div class="flex justify-between">
+                <button id="btn-back" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg transition duration-200 disabled:opacity-50">
+                    Back
+                </button>
+                <button id="btn-next" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg shadow-md transition duration-200">
+                    Next
+                </button>
+            </div>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="p-8 hidden text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="text-3xl font-bold mb-4 text-blue-900">Quiz Complete!</h2>
+            <p class="text-lg mb-6">Your results have been submitted and downloaded automatically.</p>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 inline-block">
+                <p class="text-sm text-gray-600 mb-1">Your Score</p>
+                <p id="final-score" class="text-4xl font-bold text-blue-600"></p>
+            </div>
+            <div>
+                <button id="btn-refresh" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition duration-200">
+                    Start Over (New Student)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHEAT ALERT MODAL -->
+    <div id="cheat-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl transform scale-100">
+            <div class="text-red-500 text-5xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold text-red-600 mb-2">Cheating Detected!</h2>
+            <p class="text-gray-700 mb-6">You left the active test window. This action has been recorded and reported to your teacher.</p>
+            <button id="btn-cheat-ok" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg w-full">
+                I Understand
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data - 50 Questions based on studyspanish.com Subject Pronouns lesson
+        const masterQuestions = [
+            { id: 1, es: "Translate to Spanish: 'I'", en: "yo", distractors: ["tú", "él", "nosotros"] },
+            { id: 2, es: "Translate to Spanish: 'You (informal, singular)'", en: "tú", distractors: ["usted", "él", "yo"] },
+            { id: 3, es: "Translate to Spanish: 'You (formal, singular)'", en: "usted", distractors: ["tú", "él", "nosotros"] },
+            { id: 4, es: "Translate to Spanish: 'He'", en: "él", distractors: ["ella", "tú", "yo"] },
+            { id: 5, es: "Translate to Spanish: 'She'", en: "ella", distractors: ["él", "usted", "nosotros"] },
+            { id: 6, es: "Translate to Spanish: 'We (masculine or mixed group)'", en: "nosotros", distractors: ["nosotras", "ellos", "vosotros"] },
+            { id: 7, es: "Translate to Spanish: 'We (feminine group)'", en: "nosotras", distractors: ["nosotros", "ellas", "vosotras"] },
+            { id: 8, es: "Translate to Spanish: 'They (masculine or mixed group)'", en: "ellos", distractors: ["ellas", "ustedes", "nosotros"] },
+            { id: 9, es: "Translate to Spanish: 'They (feminine group)'", en: "ellas", distractors: ["ellos", "ustedes", "nosotras"] },
+            { id: 10, es: "Translate to Spanish: 'You-all (informal, masculine or mixed group, used in Spain)'", en: "vosotros", distractors: ["ustedes", "vosotras", "ellos"] },
+            { id: 11, es: "Translate to Spanish: 'You-all (informal, feminine group, used in Spain)'", en: "vosotras", distractors: ["ustedes", "vosotros", "ellas"] },
+            { id: 12, es: "Translate to Spanish: 'You-all (formal in Spain / both formal and informal in Latin America)'", en: "ustedes", distractors: ["vosotros", "ellos", "tú"] },
+            { id: 13, es: "Which pronoun do you use when speaking directly TO your boss?", en: "usted", distractors: ["tú", "él", "yo"] },
+            { id: 14, es: "Which pronoun do you use when speaking directly TO your best friend?", en: "tú", distractors: ["usted", "él", "ella"] },
+            { id: 15, es: "Which pronoun do you use when speaking directly TO a child?", en: "tú", distractors: ["usted", "él", "ellos"] },
+            { id: 16, es: "Which pronoun do you use when speaking directly TO your teacher?", en: "usted", distractors: ["tú", "él", "nosotros"] },
+            { id: 17, es: "Which pronoun do you use when speaking directly TO your daughter?", en: "tú", distractors: ["usted", "ella", "nosotras"] },
+            { id: 18, es: "Which pronoun do you use when speaking directly TO an elderly stranger?", en: "usted", distractors: ["tú", "él", "ellos"] },
+            { id: 19, es: "Which pronoun do you use when speaking ABOUT a male teacher?", en: "él", distractors: ["usted", "tú", "ellos"] },
+            { id: 20, es: "Which pronoun do you use when speaking ABOUT a female teacher?", en: "ella", distractors: ["usted", "él", "tú"] },
+            { id: 21, es: "Which pronoun do you use when speaking ABOUT a group of boys?", en: "ellos", distractors: ["ellas", "ustedes", "vosotros"] },
+            { id: 22, es: "Which pronoun do you use when speaking ABOUT a group of girls?", en: "ellas", distractors: ["ellos", "ustedes", "vosotras"] },
+            { id: 23, es: "Which pronoun do you use when speaking ABOUT a mixed group of 5 girls and 1 boy?", en: "ellos", distractors: ["ellas", "nosotros", "ustedes"] },
+            { id: 24, es: "Which pronoun do you use when speaking ABOUT yourself and your brother?", en: "nosotros", distractors: ["nosotras", "ellos", "vosotros"] },
+            { id: 25, es: "Which pronoun do you use when speaking ABOUT yourself (if you are female) and your sister?", en: "nosotras", distractors: ["nosotros", "ellas", "vosotras"] },
+            { id: 26, es: "Which pronoun do you use when speaking TO a group of children in Spain?", en: "vosotros", distractors: ["ustedes", "ellos", "tú"] },
+            { id: 27, es: "Which pronoun do you use when speaking TO a group of girls in Spain?", en: "vosotras", distractors: ["vosotros", "ustedes", "ellas"] },
+            { id: 28, es: "Which pronoun do you use when speaking TO a group of children in Latin America?", en: "ustedes", distractors: ["vosotros", "ellos", "tú"] },
+            { id: 29, es: "Which pronoun do you use when speaking TO a group of strangers in Spain?", en: "ustedes", distractors: ["vosotros", "ellos", "tú"] },
+            { id: 30, es: "Which pronoun do you use when speaking TO a group of strangers in Latin America?", en: "ustedes", distractors: ["vosotros", "ellos", "tú"] },
+            { id: 31, es: "What is the standard abbreviation for 'usted'?", en: "Ud.", distractors: ["Uds.", "Vds.", "tú"] },
+            { id: 32, es: "What is the standard abbreviation for 'ustedes'?", en: "Uds.", distractors: ["Ud.", "Vd.", "vos"] },
+            { id: 33, es: "If María is talking about herself, which pronoun does she use?", en: "yo", distractors: ["ella", "tú", "nosotros"] },
+            { id: 34, es: "If you are talking directly TO Mr. Gómez, you use:", en: "usted", distractors: ["él", "tú", "ellos"] },
+            { id: 35, es: "If you are talking ABOUT Mr. Gómez, you use:", en: "él", distractors: ["usted", "tú", "ellos"] },
+            { id: 36, es: "If you are talking TO Mrs. Gómez, you use:", en: "usted", distractors: ["ella", "tú", "ellas"] },
+            { id: 37, es: "If you are talking ABOUT Mrs. Gómez, you use:", en: "ella", distractors: ["usted", "tú", "ellas"] },
+            { id: 38, es: "If you are talking TO your dog, which pronoun is most appropriate (informal)?", en: "tú", distractors: ["usted", "él", "vosotros"] },
+            { id: 39, es: "You and your friends (mixed group) are going to the park. What pronoun replaces 'You and your friends' when talking ABOUT yourselves?", en: "nosotros", distractors: ["ellos", "ustedes", "vosotros"] },
+            { id: 40, es: "Marta and Julia are studying. What pronoun replaces 'Marta and Julia'?", en: "ellas", distractors: ["ellos", "nosotras", "ustedes"] },
+            { id: 41, es: "Carlos and Juan are playing soccer. What pronoun replaces 'Carlos and Juan'?", en: "ellos", distractors: ["ellas", "ustedes", "nosotros"] },
+            { id: 42, es: "Carlos and Ana are eating. What pronoun replaces 'Carlos and Ana'?", en: "ellos", distractors: ["ellas", "ustedes", "nosotros"] },
+            { id: 43, es: "If a group of females in Spain addresses another group of females informally, they use:", en: "vosotras", distractors: ["ustedes", "ellas", "nosotras"] },
+            { id: 44, es: "If someone from Mexico addresses a group of friends, they use:", en: "ustedes", distractors: ["vosotros", "ellos", "tú"] },
+            { id: 45, es: "Which of the following pronouns can be translated as 'you all'?", en: "ustedes & vosotros", distractors: ["tú & usted", "él & ella", "nosotros & nosotras"] },
+            { id: 46, es: "Which pronoun implies 'we' but is used exclusively for females?", en: "nosotras", distractors: ["nosotros", "ellas", "vosotras"] },
+            { id: 47, es: "Which pronoun implies 'they' but is used exclusively for females?", en: "ellas", distractors: ["ellos", "nosotras", "ustedes"] },
+            { id: 48, es: "In Latin America, which pronoun is used for BOTH formal and informal 'you all'?", en: "ustedes", distractors: ["vosotros", "ellos", "nosotros"] },
+            { id: 49, es: "Which English pronoun has NO gender distinction, but its Spanish translation does?", en: "We (nosotros/nosotras)", distractors: ["I (yo)", "You (tú)", "None of the above"] },
+            { id: 50, es: "If a speaker is male, and he includes himself in a group of females, what pronoun does he use to say 'We'?", en: "nosotros", distractors: ["nosotras", "ellos", "ustedes"] }
+        ];
+
+        let studentData = {};
+        let quizActive = false;
+        let cheatCount = 0;
+        let currentQuestionIndex = 0;
+        let shuffledQuestions = [];
+        let userAnswers = []; // Store answers here
+
+        // DOM Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            end: document.getElementById('end-screen')
+        };
+        const form = document.getElementById('student-form');
+        const emailError = document.getElementById('email-error');
+        const cheatModal = document.getElementById('cheat-modal');
+        const btnCheatOk = document.getElementById('btn-cheat-ok');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const btnNext = document.getElementById('btn-next');
+        const btnBack = document.getElementById('btn-back');
+        const questionTracker = document.getElementById('question-tracker');
+        const cheatDisplay = document.getElementById('cheat-counter-display');
+        const cheatNumber = document.getElementById('cheat-number');
+        const btnRefresh = document.getElementById('btn-refresh');
+
+        // Utilities
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            screens[screenName].classList.remove('hidden');
+        }
+
+        // Start Quiz
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            
+            // Check for previous attempt
+            const completedEmails = JSON.parse(localStorage.getItem('completedEmails') || '[]');
+            if (completedEmails.includes(email)) {
+                emailError.classList.remove('hidden');
+                return;
+            }
+            emailError.classList.add('hidden');
+
+            studentData = {
+                firstName: document.getElementById('fname').value.trim(),
+                lastName: document.getElementById('lname').value.trim(),
+                email: email,
+                period: document.getElementById('period').value
+            };
+
+            // Prepare Quiz (Picks exactly 50 random questions)
+            shuffledQuestions = shuffleArray([...masterQuestions]).slice(0, 50).map(q => {
+                let options = shuffleArray([q.en, ...q.distractors]);
+                return { ...q, options: options };
+            });
+            userAnswers = new Array(shuffledQuestions.length).fill(null);
+            
+            quizActive = true;
+            cheatCount = 0;
+            currentQuestionIndex = 0;
+            
+            switchScreen('quiz');
+            renderQuestion();
+        });
+
+        // Render Question
+        function renderQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            questionTracker.textContent = `Question ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+            questionText.textContent = q.es;
+            
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const isChecked = userAnswers[currentQuestionIndex] === opt;
+                const optHtml = `
+                    <label class="option-label" onclick="selectRadio('opt-${index}')">
+                        <input type="radio" name="answer" id="opt-${index}" value="${opt}" class="form-radio text-blue-600 h-5 w-5" ${isChecked ? 'checked' : ''}>
+                        <span class="option-text ml-3 text-lg">${opt}</span>
+                    </label>
+                `;
+                optionsContainer.insertAdjacentHTML('beforeend', optHtml);
+            });
+
+            btnBack.disabled = currentQuestionIndex === 0;
+            btnNext.textContent = currentQuestionIndex === shuffledQuestions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        // Expose to window for inline onclick in labels
+        window.selectRadio = function(id) {
+            document.getElementById(id).checked = true;
+        }
+
+        // Navigation
+        function saveAnswer() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (selected) {
+                userAnswers[currentQuestionIndex] = selected.value;
+            }
+        }
+
+        btnNext.addEventListener('click', handleNext);
+        function handleNext() {
+            saveAnswer();
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        btnBack.addEventListener('click', () => {
+            saveAnswer();
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        // Keyboard support (Enter to go next)
+        document.addEventListener('keydown', (e) => {
+            if (quizActive && e.key === 'Enter') {
+                e.preventDefault();
+                handleNext();
+            }
+        });
+
+        // Anti-Cheating
+        function registerCheat() {
+            if (!quizActive) return;
+            cheatCount++;
+            cheatDisplay.classList.remove('hidden');
+            cheatNumber.textContent = cheatCount;
+            cheatModal.classList.remove('hidden');
+        }
+
+        btnCheatOk.addEventListener('click', () => {
+            cheatModal.classList.add('hidden');
+        });
+
+        // Detect window blur (switching tabs/apps)
+        window.addEventListener('blur', () => {
+            if (quizActive && cheatModal.classList.contains('hidden')) {
+                registerCheat();
+            }
+        });
+
+        // Detect mouse leaving the active viewport (e.g. going up to URL bar or extensions)
+        document.addEventListener('mouseleave', (e) => {
+            if (quizActive && e.clientY <= 0 && cheatModal.classList.contains('hidden')) {
+                registerCheat();
+            }
+        });
+
+        // Detect visibility change (switching tabs)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && quizActive && cheatModal.classList.contains('hidden')) {
+                registerCheat();
+            }
+        });
+
+        // Finish Quiz
+        function finishQuiz() {
+            quizActive = false;
+            
+            // Calculate Score
+            let correctCount = 0;
+            let resultsBreakdownArr = []; // Array to store "1r, 2w, 3r" based on ORIGINAL question ID
+
+            // Sort questions back to original 1-25 order for the sheet breakdown
+            let evaluation = shuffledQuestions.map((q, idx) => {
+                let ans = userAnswers[idx];
+                let isCorrect = ans === q.en;
+                if (isCorrect) correctCount++;
+                return { id: q.id, correct: isCorrect };
+            });
+
+            evaluation.sort((a, b) => a.id - b.id);
+            evaluation.forEach(item => {
+                resultsBreakdownArr.push(`${item.id}${item.correct ? 'r' : 'w'}`);
+            });
+
+            const finalScoreStr = `${correctCount}/${shuffledQuestions.length}`;
+            const resultsBreakdownStr = resultsBreakdownArr.join(', ');
+
+            // Mark email as completed
+            const completedEmails = JSON.parse(localStorage.getItem('completedEmails') || '[]');
+            completedEmails.push(studentData.email);
+            localStorage.setItem('completedEmails', JSON.stringify(completedEmails));
+
+            // Update UI
+            document.getElementById('final-score').textContent = finalScoreStr;
+            switchScreen('end');
+
+            // Send to Google Sheets
+            sendToGoogleSheets(finalScoreStr, resultsBreakdownStr);
+
+            // Auto-Download CSV
+            downloadCSV(finalScoreStr);
+        }
+
+        function sendToGoogleSheets(score, breakdown) {
+            if(GOOGLE_SHEET_WEB_APP_URL === "YOUR_GOOGLE_WEB_APP_URL_HERE") return;
+
+            const payload = {
+                title: "Spanish Subject Pronouns Quiz",
+                date: new Date().toLocaleString(),
+                firstName: studentData.firstName,
+                lastName: studentData.lastName,
+                email: studentData.email,
+                period: studentData.period,
+                score: score,
+                cheatCount: cheatCount,
+                results: breakdown
+            };
+
+            fetch(GOOGLE_SHEET_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Error saving data:", err));
+        }
+
+        function downloadCSV(score) {
+            // CSV does NOT include the right/wrong breakdown per instructions
+            const headers = ["Title", "Date", "First Name", "Last Name", "Period", "Score", "Cheating Alerts"];
+            const row = [
+                "Spanish Subject Pronouns Quiz",
+                new Date().toLocaleString().replace(/,/g, ''),
+                studentData.firstName,
+                studentData.lastName,
+                studentData.period,
+                `="${score}"`, // Force string so excel doesnt format as date
+                cheatCount
+            ];
+
+            const csvContent = headers.join(",") + "\n" + row.join(",");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Spanish_Quiz_Results_${studentData.lastName}_${studentData.firstName}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        btnRefresh.addEventListener('click', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>
