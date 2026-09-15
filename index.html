@@ -401,15 +401,16 @@
             });
 
             evaluation.sort((a, b) => a.id - b.id);
-            evaluation.forEach(item => {
-                resultsBreakdownArr.push(`${item.id}${item.correct ? 'r' : 'w'}`);
-            });
+        evaluation.forEach(item => {
+            resultsBreakdownArr.push(`${item.id}${item.correct ? 'r' : 'w'}`);
+        });
 
-            const finalScoreStr = `${correctCount}/${shuffledQuestions.length}`;
-            const resultsBreakdownStr = resultsBreakdownArr.join(', ');
+        const percentage = Math.round((correctCount / shuffledQuestions.length) * 100);
+        const finalScoreStr = `${percentage}%`;
+        const resultsBreakdownStr = resultsBreakdownArr.join(', ');
 
-            // Mark email as completed
-            const completedEmails = JSON.parse(localStorage.getItem('completedEmails') || '[]');
+        // Mark email as completed
+        const completedEmails = JSON.parse(localStorage.getItem('completedEmails') || '[]');
             completedEmails.push(studentData.email);
             localStorage.setItem('completedEmails', JSON.stringify(completedEmails));
 
