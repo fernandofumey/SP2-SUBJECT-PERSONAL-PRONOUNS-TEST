@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>Spanish Subject Pronouns Quiz</title>
+    <title>SP2 SUBJECT PRONOUNS TEST</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -56,7 +56,7 @@
         
         <!-- Header -->
         <div class="bg-blue-600 p-6 text-white text-center">
-            <h1 class="text-3xl font-bold tracking-wide">Spanish Subject Pronouns</h1>
+            <h1 class="text-3xl font-bold tracking-wide">SP2 SUBJECT PRONOUNS TEST</h1>
             <p class="text-blue-200 mt-2">Demonstrate your knowledge of Spanish pronouns and their rules</p>
         </div>
 
@@ -429,7 +429,7 @@
             if(GOOGLE_SHEET_WEB_APP_URL === "YOUR_GOOGLE_WEB_APP_URL_HERE") return;
 
             const payload = {
-                title: "Spanish Subject Pronouns Quiz",
+                title: "SP2 SUBJECT PRONOUNS TEST",
                 date: new Date().toLocaleString(),
                 firstName: studentData.firstName,
                 lastName: studentData.lastName,
@@ -454,7 +454,7 @@
             // CSV does NOT include the right/wrong breakdown per instructions
             const headers = ["Title", "Date", "First Name", "Last Name", "Period", "Score", "Cheating Alerts"];
             const row = [
-                "Spanish Subject Pronouns Quiz",
+                "SP2 SUBJECT PRONOUNS TEST",
                 new Date().toLocaleString().replace(/,/g, ''),
                 studentData.firstName,
                 studentData.lastName,
@@ -469,7 +469,7 @@
             
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", `Spanish_Quiz_Results_${studentData.lastName}_${studentData.firstName}.csv`);
+            link.setAttribute("download", `SP2_Subject_Pronouns_Test_Results_${studentData.lastName}_${studentData.firstName}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
